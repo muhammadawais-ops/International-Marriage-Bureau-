@@ -23,31 +23,48 @@ religion: 'Muslim'
   });
 
   useEffect(() => {
-    // Load approved proposals from localStorage
-    const approved = JSON.parse(localStorage.getItem('approvedProposals') || '[]');
-    // Transform them to match the expected structure
-    const transformed = approved.map((p: any) => ({
-      id: p.id || `apprv_${Math.random()}`,
-      fullName: p.fullName || 'Member',
-      age: parseInt(p.age?.toString()) || 25,
-      gender: p.gender || 'Female',
-      profession: p.jobPosition || p.profession || 'Professional',
-      city: p.currentCity || p.city || 'Pakistan',
-      country: p.homeTown || p.country || 'Pakistan',
-      sect: p.sect || 'Any',
-      caste: p.caste || 'Any',
-      religion: p.religion || 'Islam',
-      isVerified: true,
-      isNew: true,
-      photos: (p.photos && p.photos.length > 0) ? p.photos : ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800'],
-      about: p.futurePlans || p.about || 'Serious marriage seeker.',
-      expectations: p.otherDemands || p.expectations || 'No specific requirements.',
-      education: p.qualification || p.education || 'Graduate',
-      whatsapp: p.whatsapp || '',
-      phone: p.phone || ''
-    }));
+    const loadApproved = () => {
+      // Load approved proposals from localStorage
+      const approved = JSON.parse(localStorage.getItem('approvedProposals') || '[]');
+      const hiddenStatic = JSON.parse(localStorage.getItem('hiddenStaticIds') || '[]');
 
-    setAllProposals([...transformed, ...PROPOSALS]);
+      // Transform them to match the expected structure
+      const transformed = approved.map((p: any) => ({
+        id: p.id || `apprv_${Math.random()}`,
+        fullName: p.fullName || 'Member',
+        age: parseInt(p.age?.toString()) || 25,
+        gender: p.gender || 'Female',
+        profession: p.jobPosition || p.profession || 'Professional',
+        city: p.currentCity || p.city || 'Pakistan',
+        country: p.homeTown || p.country || 'Pakistan',
+        sect: p.sect || 'Any',
+        caste: p.caste || p.caste || 'Any',
+        religion: p.religion || 'Muslim',
+        isVerified: true,
+        isNew: true,
+        photos: (p.photos && p.photos.length > 0) ? p.photos : ['https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=800'],
+        about: p.futurePlans || p.about || 'Serious marriage seeker.',
+        expectations: p.otherDemands || p.expectations || 'No specific requirements.',
+        education: p.qualification || p.education || 'Graduate',
+        whatsapp: p.whatsapp || '',
+        phone: p.phone || ''
+      }));
+
+      const visibleStatic = PROPOSALS.filter(p => !hiddenStatic.includes(p.id));
+      setAllProposals([...transformed, ...visibleStatic]);
+    };
+
+    loadApproved();
+    
+    // Listen for storage changes
+    window.addEventListener('storage', loadApproved);
+    // Also listen for custom events if navigation happens in-app
+    window.addEventListener('proposalsUpdated', loadApproved);
+    
+    return () => {
+      window.removeEventListener('storage', loadApproved);
+      window.removeEventListener('proposalsUpdated', loadApproved);
+    };
   }, []);
 
   const filteredProfiles = allProposals.filter(p => {
@@ -77,17 +94,17 @@ religion: 'Muslim'
     <div id="discovery-feed" className="max-w-7xl mx-auto px-4 py-12">
       {/* Zameen-Style Header & Toggle */}
       <div className="flex flex-col items-center mb-20">
-        <div className="w-full max-w-4xl bg-emerald-900 rounded-[40px] p-10 shadow-2xl relative overflow-hidden">
+        <div className="w-full max-w-4xl bg-emerald-900 rounded-[30px] md:rounded-[40px] p-6 md:p-10 shadow-2xl relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full opacity-10 islamic-pattern" />
           
-          <div className="relative z-10">
+          <div className="relative z-10 w-full">
             {/* Toggle Switch */}
-            <div className="inline-flex bg-white/10 p-1 rounded-full mb-10 shadow-inner">
+            <div className="inline-flex w-full md:w-auto bg-white/10 p-1 rounded-full mb-8 md:mb-10 shadow-inner overflow-hidden">
               {(['Male', 'Female'] as const).map(gender => (
                 <button
                   key={gender}
                   onClick={() => setSelectedGender(gender)}
-                  className={`px-12 py-3 rounded-full text-base font-bold transition-all ${
+                  className={`flex-1 md:px-12 py-3 rounded-full text-sm md:text-base font-bold transition-all ${
                     selectedGender === gender 
                     ? 'bg-white text-emerald-950 shadow-lg' 
                     : 'text-white/60 hover:text-white'
@@ -326,9 +343,9 @@ function UnlockModal({ profile, onClose }: { profile: any, onClose: () => void }
       />
       <motion.div 
         layoutId={profile.id}
-        className="relative w-full max-w-5xl bg-[#081a08] rounded-[50px] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[700px] z-[101] border border-white/10"
+        className="relative w-full max-w-5xl bg-[#081a08] rounded-[30px] md:rounded-[50px] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-0 md:min-h-[700px] z-[101] border border-white/10 max-h-[95vh] md:max-h-[90vh]"
       >
-        <div className="md:w-5/12 bg-emerald-900 relative p-12 md:p-16 flex flex-col justify-end overflow-hidden">
+        <div className="md:w-5/12 bg-emerald-900 relative p-8 md:p-16 flex flex-col justify-end overflow-hidden shrink-0 h-48 md:h-auto">
           <div className="absolute top-0 left-0 w-full h-full opacity-20 islamic-pattern" />
           <img 
             src={profile.photos[0]} 
@@ -338,16 +355,16 @@ function UnlockModal({ profile, onClose }: { profile: any, onClose: () => void }
           <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-emerald-900 to-transparent" />
           
           <div className="relative z-10">
-             <div className="w-16 h-1.5 bg-gold-500 mb-8 rounded-full" />
-             <h3 className="text-white text-5xl font-serif leading-tight">{profile.fullName}, {profile.age}</h3>
-             <p className="text-gold-500 font-bold text-sm uppercase tracking-[0.2em] mt-6 flex items-center gap-3">
-               <MapPin size={20} />
+             <div className="w-12 md:w-16 h-1 md:h-1.5 bg-gold-500 mb-4 md:mb-8 rounded-full" />
+             <h3 className="text-white text-3xl md:text-5xl font-serif leading-tight">{profile.fullName}, {profile.age}</h3>
+             <p className="text-gold-500 font-bold text-[10px] md:text-sm uppercase tracking-[0.2em] mt-3 md:mt-6 flex items-center gap-2 md:gap-3">
+               <MapPin size={16} className="md:w-5 md:h-5" />
                {profile.city}, {profile.country}
              </p>
           </div>
         </div>
 
-        <div className="md:w-7/12 p-16 flex flex-col text-left overflow-y-auto max-h-[90vh]">
+        <div className="md:w-7/12 p-6 md:p-16 flex flex-col text-left overflow-y-auto">
           <div className="flex-1">
             <div className="flex items-center justify-between mb-12">
               <h4 className="text-3xl font-serif text-white italic">Detailed Proposal</h4>
@@ -374,14 +391,14 @@ function UnlockModal({ profile, onClose }: { profile: any, onClose: () => void }
               </div>
             </div>
 
-            <div className="mt-16 p-10 bg-white/5 rounded-[40px] border border-white/10 space-y-8">
+            <div className="mt-8 md:mt-16 p-6 md:p-10 bg-white/5 rounded-[30px] md:rounded-[40px] border border-white/10 space-y-6 md:space-y-8">
               <div className="flex items-center justify-between">
                 <div>
-                  <h5 className="font-bold text-2xl text-white">Contact Access</h5>
-                  <p className="text-white/30 text-sm italic mt-1">Verified phone number and home address</p>
+                  <h5 className="font-bold text-xl md:text-2xl text-white">Contact Access</h5>
+                  <p className="text-white/30 text-[10px] md:text-sm italic mt-1">Verified phone number and home address</p>
                 </div>
-                <div className="w-12 h-12 bg-gold-500 rounded-2xl flex items-center justify-center text-emerald-950 shadow-xl shadow-gold-500/20">
-                   <Lock size={24} />
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gold-500 rounded-xl md:rounded-2xl flex items-center justify-center text-emerald-950 shadow-xl shadow-gold-500/20">
+                   <Lock size={20} className="md:w-6 md:h-6" />
                 </div>
               </div>
 

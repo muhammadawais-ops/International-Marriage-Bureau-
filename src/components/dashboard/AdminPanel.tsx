@@ -2,29 +2,31 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Users, CreditCard, CheckCircle, XCircle, Search, Filter, Shield, Eye, Trash2, ArrowLeft, Phone, Share2, Image as ImageIcon } from 'lucide-react';
 import { ADMIN_EMAILS, ADMIN_PASSWORD } from '../../constants';
+import { PROPOSALS } from '../../data/proposals';
 
 // Mock data as simulated from database
-const MOCK_USERS_DATA = [
-  { id: '1', fullName: 'Zoya Ahmed', email: 'zoya@example.com', gender: 'Female', city: 'Lahore', isPaymentVerified: true, createdAt: '2023-10-25' },
-  { id: '2', fullName: 'Sara Khan', email: 'sara@example.com', gender: 'Female', city: 'London', isPaymentVerified: false, createdAt: '2023-10-26' },
-  { id: '3', fullName: 'Ahmed Ali', email: 'ahmed@example.com', gender: 'Male', city: 'Islamabad', isPaymentVerified: true, createdAt: '2023-10-27' },
-  { id: '4', fullName: 'Fatima Zahra', email: 'fatima@example.com', gender: 'Female', city: 'Karachi', isPaymentVerified: false, createdAt: '2023-10-28' },
-];
-
 export default function AdminPanel({ onBack }: { onBack: () => void }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const [users, setUsers] = useState(MOCK_USERS_DATA);
+  const [users, setUsers] = useState<any[]>([]);
   const [pendingProposals, setPendingProposals] = useState<any[]>([]);
+  const [approvedProposals, setApprovedProposals] = useState<any[]>([]);
+  const [hiddenStaticIds, setHiddenStaticIds] = useState<string[]>([]);
   const [selectedProposal, setSelectedProposal] = useState<any>(null);
   const [search, setSearch] = useState('');
 
   useEffect(() => {
     const pending = JSON.parse(localStorage.getItem('pendingProposals') || '[]');
+    const approved = JSON.parse(localStorage.getItem('approvedProposals') || '[]');
+    const hidden = JSON.parse(localStorage.getItem('hiddenStaticIds') || '[]');
+    const registered = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
     setPendingProposals(pending);
+    setApprovedProposals(approved);
+    setHiddenStaticIds(hidden);
+    setUsers(registered);
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -38,7 +40,9 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
   };
 
   const togglePaymentStatus = (id: string) => {
-    setUsers(users.map(u => u.id === id ? { ...u, isPaymentVerified: !u.isPaymentVerified } : u));
+    const updated = users.map(u => u.id === id ? { ...u, isPaymentVerified: !u.isPaymentVerified } : u);
+    setUsers(updated);
+    localStorage.setItem('registeredUsers', JSON.stringify(updated));
   };
 
   const pushToHome = (proposal: any) => {
@@ -54,6 +58,12 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     setPendingProposals(newPending);
     localStorage.setItem('pendingProposals', JSON.stringify(newPending));
     
+    // Refresh approved list in state
+    setApprovedProposals([...existingApproved, approvedProposal]);
+    
+    // 4. Trigger refresh for DiscoveryFeed
+    window.dispatchEvent(new Event('proposalsUpdated'));
+    
     setSelectedProposal(null);
     alert("Proposal Pushed to Home Page!");
   };
@@ -62,10 +72,39 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
     const newPending = pendingProposals.filter(p => p.id !== id);
     setPendingProposals(newPending);
     localStorage.setItem('pendingProposals', JSON.stringify(newPending));
+    if (selectedProposal?.id === id) setSelectedProposal(null);
+  };
+
+  const deleteApproved = (id: string) => {
+    const newApproved = approvedProposals.filter(p => p.id !== id);
+    setApprovedProposals(newApproved);
+    localStorage.setItem('approvedProposals', JSON.stringify(newApproved));
+    
+    // Trigger refresh for DiscoveryFeed
+    window.dispatchEvent(new Event('proposalsUpdated'));
+    if (selectedProposal?.id === id) setSelectedProposal(null);
+    alert("Proposal removed from Home Page!");
+  };
+
+  const hideStaticProposal = (id: string) => {
+    const newHidden = [...hiddenStaticIds, id];
+    setHiddenStaticIds(newHidden);
+    localStorage.setItem('hiddenStaticIds', JSON.stringify(newHidden));
+    window.dispatchEvent(new Event('proposalsUpdated'));
+    alert("Static proposal hidden from visitors!");
+  };
+
+  const unhideStaticProposal = (id: string) => {
+    const newHidden = hiddenStaticIds.filter(hid => hid !== id);
+    setHiddenStaticIds(newHidden);
+    localStorage.setItem('hiddenStaticIds', JSON.stringify(newHidden));
+    window.dispatchEvent(new Event('proposalsUpdated'));
   };
 
   const deleteUser = (id: string) => {
-    setUsers(users.filter(u => u.id !== id));
+    const updated = users.filter(u => u.id !== id);
+    setUsers(updated);
+    localStorage.setItem('registeredUsers', JSON.stringify(updated));
   };
 
   if (!isAuthenticated) {
@@ -115,45 +154,45 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
   return (
     <div className="min-h-screen bg-emerald-950 p-8 md:p-12">
       <div className="max-w-7xl mx-auto">
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-12 gap-6">
-          <div className="flex items-center gap-6">
+        <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 md:mb-12 gap-6">
+          <div className="flex items-center gap-4 md:gap-6">
             <button 
               onClick={onBack}
-              className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/40 hover:text-gold-500 hover:bg-white/10 transition-all border border-white/5"
+              className="w-10 h-10 md:w-12 md:h-12 bg-white/5 rounded-2xl flex items-center justify-center text-white/40 hover:text-gold-500 hover:bg-white/10 transition-all border border-white/5"
             >
-              <ArrowLeft size={24} />
+              <ArrowLeft size={20} className="md:w-6 md:h-6" />
             </button>
             <div>
-              <h1 className="text-4xl font-serif text-white italic">Command Center</h1>
-              <p className="text-gold-500/60 text-xs font-bold uppercase tracking-[0.2em] mt-2">Managing the future of Nikkah</p>
+              <h1 className="text-2xl md:text-4xl font-serif text-white italic">Command Center</h1>
+              <p className="text-gold-500/60 text-[10px] md:text-xs font-bold uppercase tracking-[0.2em] mt-1 md:mt-2">Managing the future of Nikkah</p>
             </div>
           </div>
           
-          <div className="flex items-center gap-4 bg-white/5 p-2 rounded-2xl shadow-xl border border-white/10">
-             <div className="bg-white/5 p-4 rounded-xl flex items-center gap-4">
-                <Users className="text-gold-500" size={20} />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 bg-white/5 p-2 rounded-2xl shadow-xl border border-white/10">
+             <div className="bg-white/5 p-3 md:p-4 rounded-xl flex items-center gap-4">
+                <Users className="text-gold-500" size={18} />
                 <div>
-                   <p className="text-[10px] uppercase font-bold text-white/40">Total Members</p>
-                   <p className="text-lg font-bold text-white">{users.length}</p>
+                   <p className="text-[8px] md:text-[10px] uppercase font-bold text-white/40">Total Members</p>
+                   <p className="text-base md:text-lg font-bold text-white">{users.length}</p>
                 </div>
              </div>
-             <div className="bg-white/5 p-4 rounded-xl flex items-center gap-4 border border-white/5">
-                <CreditCard className="text-gold-500" size={20} />
+             <div className="bg-white/5 p-3 md:p-4 rounded-xl flex items-center gap-4 border border-white/5">
+                <CheckCircle className="text-emerald-500" size={18} />
                 <div>
-                   <p className="text-[10px] uppercase font-bold text-white/40">Pending Approval</p>
-                   <p className="text-lg font-bold text-white">{pendingProposals.length}</p>
+                   <p className="text-[8px] md:text-[10px] uppercase font-bold text-white/40">Live Listings</p>
+                   <p className="text-base md:text-lg font-bold text-white">{approvedProposals.length}</p>
                 </div>
              </div>
           </div>
         </header>
 
-        <div className="space-y-12">
+        <div className="space-y-8 md:space-y-12">
           {/* Real Pending Proposals */}
-          <div className="space-y-6">
-            <h2 className="text-2xl font-serif text-white italic flex items-center gap-3">
-              <Shield className="text-gold-500" size={24} /> 
+          <div className="space-y-4 md:space-y-6">
+            <h2 className="text-xl md:text-2xl font-serif text-white italic flex items-center gap-3">
+              <Shield className="text-gold-500 md:w-6 md:h-6" size={20} /> 
               Pending Approvals 
-              <span className="text-xs bg-gold-500 text-emerald-950 px-3 py-1 rounded-full font-bold ml-2">New</span>
+              <span className="text-[8px] md:text-xs bg-gold-500 text-emerald-950 px-2 py-0.5 md:px-3 md:py-1 rounded-full font-bold ml-2 uppercase">New</span>
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -207,7 +246,7 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                              onClick={() => setSelectedProposal(prop)}
                              className="text-gold-500 hover:underline"
                            >
-                              View Details
+                               View Details
                            </button>
                         </div>
                         
@@ -221,6 +260,102 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                    </motion.div>
                  ))
                )}
+            </div>
+          </div>
+
+          {/* Live Approved Proposals */}
+          <div className="space-y-4 md:space-y-6">
+            <h2 className="text-xl md:text-2xl font-serif text-white italic flex items-center gap-3">
+              <CheckCircle className="text-emerald-500 md:w-6 md:h-6" size={20} /> 
+              Live Listings (All on Home)
+              <span className="text-[10px] text-white/40 font-bold uppercase tracking-widest ml-auto">
+                Users: {approvedProposals.length} | Static: {PROPOSALS.length - hiddenStaticIds.length}
+              </span>
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+               {/* User Submitted */}
+               {approvedProposals.map((prop) => (
+                   <motion.div 
+                    layoutId={prop.id}
+                    key={prop.id} 
+                    className="glass border border-emerald-500/20 rounded-[32px] overflow-hidden group hover:border-emerald-500/50 transition-all bg-emerald-900/10"
+                   >
+                     <div className="aspect-[4/3] relative">
+                        <img src={prop.photos[0]} className="w-full h-full object-cover opacity-80" />
+                        <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                           <span className="bg-emerald-500/80 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
+                              User Submitted
+                           </span>
+                        </div>
+                        <button 
+                          onClick={() => deleteApproved(prop.id)}
+                          className="absolute top-4 right-4 w-10 h-10 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all"
+                          title="Permanently Remove"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                     </div>
+                     <div className="p-6 space-y-4">
+                        <div>
+                           <h4 className="text-white font-bold text-xl">{prop.fullName}</h4>
+                           <p className="text-white/40 text-xs font-medium uppercase tracking-[0.2em]">{prop.city || prop.currentCity}, {prop.age} Years</p>
+                        </div>
+                        <button 
+                             onClick={() => setSelectedProposal(prop)}
+                             className="text-gold-500 text-xs font-bold hover:underline"
+                        >
+                           View Details
+                        </button>
+                     </div>
+                   </motion.div>
+                ))}
+
+               {/* Static Proposals */}
+               {PROPOSALS.filter(p => !hiddenStaticIds.includes(p.id)).map((prop) => (
+                   <motion.div 
+                    key={prop.id} 
+                    className="glass border border-white/10 rounded-[32px] overflow-hidden group hover:border-gold-500/30 transition-all bg-white/5 opacity-60"
+                   >
+                     <div className="aspect-[4/3] relative">
+                        <img src={prop.photos[0]} className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all" />
+                        <div className="absolute top-4 left-4">
+                           <span className="bg-white/20 backdrop-blur px-3 py-1 rounded-full text-[10px] font-bold text-white uppercase tracking-widest border border-white/10">
+                              Static Content
+                           </span>
+                        </div>
+                        <button 
+                          onClick={() => hideStaticProposal(prop.id)}
+                          className="absolute top-4 right-4 w-10 h-10 bg-white/10 text-white rounded-full flex items-center justify-center shadow-lg hover:bg-red-500 transition-all"
+                          title="Hide from Home"
+                        >
+                          <XCircle size={18} />
+                        </button>
+                     </div>
+                     <div className="p-6">
+                        <h4 className="text-white font-bold text-lg">{prop.fullName}</h4>
+                        <p className="text-white/40 text-[10px] uppercase tracking-widest">{prop.city}, {prop.age} Yrs</p>
+                     </div>
+                   </motion.div>
+                ))}
+
+                {/* Hidden Static (Optional, to restore if needed) */}
+                {hiddenStaticIds.length > 0 && (
+                  <div className="col-span-full pt-10 border-t border-white/5">
+                    <h3 className="text-xs font-bold text-white/20 uppercase tracking-[0.3em] mb-4">Hidden Static Proposals</h3>
+                    <div className="flex flex-wrap gap-2">
+                       {hiddenStaticIds.map(id => {
+                         const p = PROPOSALS.find(x => x.id === id);
+                         return (
+                           <div key={id} className="bg-white/5 border border-white/10 px-4 py-2 rounded-xl flex items-center gap-3">
+                              <span className="text-xs text-white/40">{p?.fullName || id}</span>
+                              <button onClick={() => unhideStaticProposal(id)} className="text-gold-500 hover:text-white"><CheckCircle size={14}/></button>
+                           </div>
+                         );
+                       })}
+                    </div>
+                  </div>
+                )}
             </div>
           </div>
 
@@ -390,12 +525,21 @@ export default function AdminPanel({ onBack }: { onBack: () => void }) {
                   </div>
 
                   <div className="mt-12 flex gap-4">
-                     <button 
-                       onClick={() => pushToHome(selectedProposal)}
-                       className="flex-1 py-4 bg-gold-500 text-emerald-950 rounded-2xl font-bold uppercase tracking-widest shadow-xl shadow-gold-500/10 hover:scale-[1.02] active:scale-95 transition-all outline-none"
-                     >
-                       Approve & Push to Home
-                     </button>
+                     {selectedProposal.status === 'live' ? (
+                        <button 
+                          onClick={() => deleteApproved(selectedProposal.id)}
+                          className="flex-1 py-4 bg-red-500 text-white rounded-2xl font-bold uppercase tracking-widest shadow-xl shadow-red-500/10 hover:scale-[1.02] active:scale-95 transition-all outline-none"
+                        >
+                          Delete & Remove from Home
+                        </button>
+                     ) : (
+                        <button 
+                          onClick={() => pushToHome(selectedProposal)}
+                          className="flex-1 py-4 bg-gold-500 text-emerald-950 rounded-2xl font-bold uppercase tracking-widest shadow-xl shadow-gold-500/10 hover:scale-[1.02] active:scale-95 transition-all outline-none"
+                        >
+                          Approve & Push to Home
+                        </button>
+                     )}
                   </div>
                </div>
             </motion.div>

@@ -45,16 +45,16 @@ export default function SuccessStories({ onBack }: { onBack?: () => void }) {
           <div className="w-20 h-1 bg-gold-500 mx-auto rounded-full mt-6" />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {STORIES.map((story, i) => (
             <motion.div 
               key={story.couple}
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="bg-white/5 rounded-[40px] overflow-hidden flex flex-col lg:flex-row shadow-2xl border border-white/5 group"
+              className="bg-white/5 rounded-[30px] md:rounded-[40px] overflow-hidden flex flex-col sm:flex-row shadow-2xl border border-white/5 group"
             >
-              <div className="lg:w-2/5 h-64 lg:h-auto overflow-hidden">
+              <div className="sm:w-2/5 h-48 sm:h-auto overflow-hidden">
                 <img 
                   src={story.image} 
                   alt={story.couple} 
@@ -62,8 +62,8 @@ export default function SuccessStories({ onBack }: { onBack?: () => void }) {
                   referrerPolicy="no-referrer"
                 />
               </div>
-              <div className="lg:w-3/5 p-8 lg:p-12 relative flex flex-col justify-center">
-                <Quote className="absolute top-8 right-8 text-gold-500/10" size={60} />
+              <div className="sm:w-3/5 p-6 md:p-10 lg:p-12 relative flex flex-col justify-center">
+                <Quote className="absolute top-4 right-4 md:top-8 md:right-8 text-gold-500/10" size={40} md:size={60} />
                 <h3 className="text-2xl font-serif text-white mb-1">{story.couple}</h3>
                 <p className="text-xs font-bold uppercase tracking-widest text-gold-500 mb-6">{story.location}</p>
                 <p className="text-white/60 italic leading-relaxed font-light font-sans text-sm">"{story.story}"</p>

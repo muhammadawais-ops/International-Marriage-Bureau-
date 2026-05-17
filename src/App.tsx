@@ -3,24 +3,53 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from './components/layout/Navbar';
 import Hero from './components/home/Hero';
 import SuccessStories from './components/home/SuccessStories';
 import OnboardingWizard from './components/onboarding/OnboardingWizard';
+import AuthModal from './components/auth/AuthModal';
 import DiscoveryFeed from './components/home/DiscoveryFeed';
 import AdminPanel from './components/dashboard/AdminPanel';
 import PremiumScreen from './components/premium/PremiumScreen';
 import BottomNav from './components/layout/BottomNav';
-import { Heart, Shield } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { Heart, Shield, LogOut, User as UserIcon } from 'lucide-react';
 import { ADMIN_EMAILS } from './constants';
 
 export default function App() {
   const [showWizard, setShowWizard] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [activeView, setActiveView] = useState('home');
+  const [user, setUser] = useState<any>(null);
   
-  // In a real app, this would come from auth state
-  const currentUserEmail = "muhammadawais@carpediem.company"; 
+  useEffect(() => {
+    const session = localStorage.getItem('authSession');
+    if (session) {
+      setUser(JSON.parse(session));
+    }
+  }, []);
+
+  const handleLoginSuccess = (u: any) => {
+    setUser(u);
+    localStorage.setItem('authSession', JSON.stringify(u));
+  };
+
+  const handleLogout = () => {
+    setUser(null);
+    localStorage.removeItem('authSession');
+    setActiveView('home');
+  };
+
+  const handleStartWizard = () => {
+    if (user) {
+      setShowWizard(true);
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
+  const currentUserEmail = user?.email || ""; 
   const isAdmin = ADMIN_EMAILS.includes(currentUserEmail);
 
   const renderContent = () => {
@@ -28,7 +57,7 @@ export default function App() {
       case 'home':
         return (
           <div key="home-view">
-            <Hero onStart={() => setShowWizard(true)} />
+            <Hero onStart={handleStartWizard} />
             <DiscoveryFeed key={`feed-home-${activeView}`} />
             <SuccessStories />
           </div>
@@ -65,21 +94,40 @@ export default function App() {
       case 'likes':
         return <PremiumScreen />;
       default:
-        return <Hero onStart={() => setShowWizard(true)} />;
+        return <Hero onStart={handleStartWizard} />;
     }
   };
 
   return (
     <div className="min-h-screen bg-emerald-950 pb-24">
       {(activeView === 'home' || activeView === 'stories') && (
-        <Navbar onStart={() => setShowWizard(true)} isAdmin={isAdmin} setActiveView={setActiveView} />
+        <Navbar 
+          onStart={handleStartWizard} 
+          onAuth={() => setShowAuthModal(true)}
+          user={user}
+          onLogout={handleLogout}
+          isAdmin={isAdmin} 
+          setActiveView={setActiveView} 
+        />
       )}
       
       <main>
         {renderContent()}
       </main>
       
-      {showWizard && <OnboardingWizard onClose={() => setShowWizard(false)} />}
+      <AnimatePresence>
+        {showWizard && (
+          <OnboardingWizard onClose={() => setShowWizard(false)} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showAuthModal && (
+          <AuthModal 
+            onClose={() => setShowAuthModal(false)} 
+            onLoginSuccess={handleLoginSuccess} 
+          />
+        )}
+      </AnimatePresence>
       
       {activeView !== 'home' && (
         <BottomNav activeView={activeView} setActiveView={setActiveView} />
@@ -87,9 +135,9 @@ export default function App() {
       
       {activeView === 'home' && (
         <footer className="bg-emerald-900 text-off-white py-20 px-4">
-          <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-12">
-            <div className="col-span-2">
-               <div className="flex items-center gap-2 mb-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 text-center md:text-left">
+            <div className="col-span-1 md:col-span-2">
+               <div className="flex flex-col md:flex-row items-center gap-2 mb-6 justify-center md:justify-start">
                   <div className="w-8 h-8 bg-gold-500 rounded flex items-center justify-center">
                     <Heart className="text-emerald-900 fill-emerald-900" size={18} />
                   </div>

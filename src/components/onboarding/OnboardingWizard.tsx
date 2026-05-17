@@ -36,7 +36,7 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
     income: '',
     natureOfJob: '',
     futurePlans: '',
-    religion: 'Islam',
+    religion: 'Muslim',
     caste: '',
     language: 'Urdu',
     sect: '',
@@ -200,13 +200,13 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
     switch (step) {
       case 0:
         return (
-          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-8">
+          <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="text-center space-y-6 md:space-y-8">
             <div className="space-y-4">
-              <h2 className="text-3xl font-serif text-white italic">Welcome Brother/Sister</h2>
-              <p className="text-white/40 text-sm italic uppercase tracking-widest">First, Share your 2-3 recent decent pictures</p>
+              <h2 className="text-2xl md:text-3xl font-serif text-white italic">Welcome Brother/Sister</h2>
+              <p className="text-white/40 text-[10px] md:text-sm italic uppercase tracking-widest">First, Share your 2-3 recent decent pictures</p>
             </div>
 
-            <div className="flex justify-center gap-4">
+            <div className="flex flex-wrap justify-center gap-3 md:gap-4">
               {[0, 1, 2].map(i => (
                 <div key={i} className="relative group">
                   <input 
@@ -217,30 +217,30 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
                     onChange={handleImageUpload}
                   />
                   {formData.photos[i] ? (
-                    <div className="w-24 h-32 rounded-2xl overflow-hidden border-2 border-gold-500 relative">
+                    <div className="w-20 h-28 md:w-24 md:h-32 rounded-2xl overflow-hidden border-2 border-gold-500 relative">
                       <img src={formData.photos[i]} className="w-full h-full object-cover" alt={`Upload ${i}`} />
                       <button 
                         onClick={() => removePhoto(i)}
-                        className="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 w-5 h-5 md:w-6 md:h-6 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity"
                       >
-                        <X size={14} />
+                        <X size={12} />
                       </button>
                     </div>
                   ) : (
                     <label 
                       htmlFor={`photo-upload-${i}`}
-                      className="w-24 h-32 rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 hover:border-gold-500/50 cursor-pointer transition-all"
+                      className="w-20 h-28 md:w-24 md:h-32 rounded-2xl border-2 border-dashed border-white/10 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 hover:border-gold-500/50 cursor-pointer transition-all"
                     >
-                       <Camera className="text-white/20 mb-2" size={24} />
-                       <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">Upload Photo</span>
+                       <Camera className="text-white/20 mb-1 md:mb-2" size={20} md:size={24} />
+                       <span className="text-[7px] md:text-[8px] font-bold text-white/20 uppercase tracking-widest text-center px-1">Upload Photo</span>
                     </label>
                   )}
                 </div>
               ))}
             </div>
-            <div className="p-6 bg-gold-500/5 rounded-2xl border border-gold-500/10">
-               <p className="text-xs text-gold-500/60 leading-relaxed font-medium">
-                 Your photos are kept highly confidential and are only shared with verified, high-intent profiles after your explicit permission.
+            <div className="p-4 md:p-6 bg-gold-500/5 rounded-2xl border border-gold-500/10">
+               <p className="text-[10px] md:text-xs text-gold-500/60 leading-relaxed font-medium">
+                 Your photos are kept highly confidential and are only shared with verified seekers after your permission.
                </p>
             </div>
           </motion.div>
@@ -311,8 +311,8 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
       case 2:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <h2 className="text-2xl font-serif text-white border-b border-white/5 pb-2">Personal Information</h2>
-            <div className="grid grid-cols-2 gap-4 text-left">
+            <h2 className="text-xl md:text-2xl font-serif text-white border-b border-white/5 pb-2">Personal Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div className="col-span-2">
                 <label className="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Full Name</label>
                 <input type="text" className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white outline-none focus:border-gold-500" placeholder="Muhammad Ali" onChange={e => setFormData({...formData, fullName: e.target.value})} value={formData.fullName} />
@@ -355,8 +355,8 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
       case 3:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <h2 className="text-2xl font-serif text-white border-b border-white/5 pb-2">Education & Career</h2>
-            <div className="grid grid-cols-2 gap-4 text-left">
+            <h2 className="text-xl md:text-2xl font-serif text-white border-b border-white/5 pb-2">Education & Career</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Qualification</label>
                 <input type="text" className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white outline-none focus:border-gold-500" placeholder="Masters" onChange={e => setFormData({...formData, qualification: e.target.value})} value={formData.qualification} />
@@ -388,8 +388,8 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
       case 4:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <h2 className="text-2xl font-serif text-white border-b border-white/5 pb-2">Religion & Property</h2>
-            <div className="grid grid-cols-2 gap-4 text-left">
+            <h2 className="text-xl md:text-2xl font-serif text-white border-b border-white/5 pb-2">Religion & Property</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
                <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Religion</label>
                 <input type="text" className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white outline-none" value="Islam" readOnly />
@@ -465,8 +465,8 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
       case 5:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <h2 className="text-2xl font-serif text-white border-b border-white/5 pb-2">Family & Address</h2>
-            <div className="grid grid-cols-2 gap-4 text-left">
+            <h2 className="text-xl md:text-2xl font-serif text-white border-b border-white/5 pb-2">Family & Address</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Father's Occupation</label>
                 <input type="text" className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white outline-none focus:border-gold-500" placeholder="Retired / Business" onChange={e => setFormData({...formData, fatherOccupation: e.target.value})} value={formData.fatherOccupation} />
@@ -508,8 +508,8 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
       case 6:
         return (
           <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-4">
-            <h2 className="text-2xl font-serif text-white border-b border-white/5 pb-2">Your Requirements</h2>
-            <div className="grid grid-cols-2 gap-4 text-left">
+            <h2 className="text-xl md:text-2xl font-serif text-white border-b border-white/5 pb-2">Your Requirements</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
               <div>
                 <label className="text-xs font-bold uppercase tracking-widest text-white/40 mb-1 block">Age Limit</label>
                 <input type="text" className="w-full p-3 rounded-lg bg-white/5 border border-white/10 text-white outline-none focus:border-gold-500" placeholder="20 - 25" onChange={e => setFormData({...formData, reqAge: e.target.value})} value={formData.reqAge} />
@@ -658,17 +658,17 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-emerald-900/60 backdrop-blur-md" onClick={onClose} />
       
-      <div className="relative w-full max-w-4xl bg-emerald-950 rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-[700px] border border-white/10">
+      <div className="relative w-full max-w-4xl bg-emerald-950 rounded-[30px] md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col md:flex-row min-h-0 md:min-h-[700px] border border-white/10 max-h-[95vh] md:max-h-[90vh]">
         {/* Left Panel */}
-        <div className="md:w-1/3 bg-emerald-900 relative p-10 flex flex-col justify-end overflow-hidden">
+        <div className="md:w-1/3 bg-emerald-900 relative p-6 md:p-10 flex flex-col justify-end overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-full opacity-20 islamic-pattern" />
           <div className="relative z-10">
-             <div className="w-12 h-1 bg-gold-500 mb-6" />
-             <h3 className="text-white text-4xl font-serif leading-tight">Your Profile <br/>is Your Trust.</h3>
-             <p className="text-white/40 text-[10px] mt-6 font-bold uppercase tracking-[0.2em]">Step {step + 1} of {STEPS.length}: {STEPS[step]}</p>
+             <div className="w-12 h-1 bg-gold-500 mb-4 md:mb-6" />
+             <h3 className="text-white text-2xl md:text-4xl font-serif leading-tight">Your Profile <br className="hidden md:block"/>is Your Trust.</h3>
+             <p className="text-white/40 text-[8px] md:text-[10px] mt-2 md:mt-6 font-bold uppercase tracking-[0.2em]">Step {step + 1} of {STEPS.length}</p>
           </div>
           
-          <div className="flex flex-col gap-2 mt-8">
+          <div className="hidden md:flex flex-col gap-2 mt-8">
             {STEPS.map((s, i) => (
               <div key={i} className="flex items-center gap-3">
                  <div className={`w-1.5 h-1.5 rounded-full transition-all duration-500 ${i <= step ? 'bg-gold-500' : 'bg-white/20'}`} />
@@ -679,21 +679,25 @@ export default function OnboardingWizard({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Content Right */}
-        <div className="md:w-2/3 p-12 flex flex-col relative">
+        <div className="md:w-2/3 p-6 md:p-12 flex flex-col relative overflow-y-auto">
           <button 
-            onClick={onClose}
-            className="absolute top-8 right-8 text-white/20 hover:text-white transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="absolute top-4 right-4 md:top-8 md:right-8 text-white/20 hover:text-white transition-colors z-50 cursor-pointer p-2"
+            aria-label="Close"
           >
             <X size={24} />
           </button>
           
-          <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
+          <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full pt-8 md:pt-0">
             <AnimatePresence mode="wait">
                 {renderStepContent()}
             </AnimatePresence>
           </div>
 
-          <div className="flex items-center justify-between mt-12 pt-8 border-t border-white/10">
+          <div className="flex items-center justify-between mt-8 md:mt-12 pt-6 md:pt-8 border-t border-white/10 pb-4 md:pb-0">
             {step > 0 ? (
               <button 
                 onClick={prevStep}
