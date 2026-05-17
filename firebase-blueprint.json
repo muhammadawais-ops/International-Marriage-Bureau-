@@ -1,0 +1,76 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Comprehensive user profile for NikahConnect",
+      "type": "object",
+      "properties": {
+        "fullName": { "type": "string" },
+        "displayName": { "type": "string" },
+        "gender": { "type": "string", "enum": ["Male", "Female"] },
+        "dob": { "type": "string", "format": "date" },
+        "disability": { "type": "string" },
+        "sect": { "type": "string" },
+        "caste": { "type": "string" },
+        "language": { "type": "string" },
+        "city": { "type": "string" },
+        "homeTown": { "type": "string" },
+        "country": { "type": "string" },
+        "qualification": { "type": "string" },
+        "university": { "type": "string" },
+        "jobPosition": { "type": "string" },
+        "income": { "type": "string" },
+        "homeStatus": { "type": "string" },
+        "isVerified": { "type": "boolean" },
+        "isPaymentVerified": { "type": "boolean" },
+        "trustScore": { "type": "number" },
+        "unlockedBy": { "type": "array", "items": { "type": "string" } },
+        "photos": { "type": "array", "items": { "type": "string" } }
+      },
+      "required": ["fullName", "gender", "dob", "sect", "city", "country", "caste"]
+    },
+    "Chat": {
+      "title": "Conversation",
+      "description": "Chat channel between two matched users",
+      "type": "object",
+      "properties": {
+        "participants": { "type": "array", "items": { "type": "string" } },
+        "lastMessage": { "type": "string" },
+        "lastMessageAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["participants"]
+    },
+    "Match": {
+      "title": "Mutual Match",
+      "description": "Represents a mutual like between two users",
+      "type": "object",
+      "properties": {
+        "users": { "type": "array", "items": { "type": "string" } },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["users"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles"
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "Conversation channels"
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "object",
+      "description": "Individual messages"
+    },
+    "/matches/{matchId}": {
+      "schema": "Match",
+      "description": "Mutual matches"
+    },
+    "/users/{userId}/likes/{likedUserId}": {
+      "schema": "object",
+      "description": "Outbound likes"
+    }
+  }
+}

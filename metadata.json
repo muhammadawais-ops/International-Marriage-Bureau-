@@ -1,0 +1,6 @@
+{
+  "name": "International Marriage Bureau VHR",
+  "description": "A premium, international matrimonial platform for serious Marriage seekers, featuring personalized matching and secure privacy controls.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
